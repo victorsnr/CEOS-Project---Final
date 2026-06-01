@@ -1,37 +1,138 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TodoItem from '../components/TodoItem';
 
 export default function TodoListPage() {
-  const [todos, setTodos] = useState([
-    { id: 1, title: 'Finalizar o protótipo no Figma', completed: true },
-    { id: 2, title: 'Configurar o Tailwind CSS', completed: true },
-    { id: 3, title: 'Criar a tela de Login e Cadastro', completed: false },
-    { id: 4, title: 'Integrar a API com o fetch', completed: false },
-  ]);
+  const [todos, setTodos] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState('');
+  
+  
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskDescription, setNewTaskDescription] = useState('');
 
-  // Função que simula o POST (Adicionar)
-  const handleAddTodo = () => {
-    if (newTaskTitle.trim() === '') return;
+  const handleLoadTodos = async () => {
+      try {
+        const token = localStorage.getItem("token");
 
-    const newTask = {
-      id: Date.now(), 
-      title: newTaskTitle,
-      completed: false
+        const response = await fetch("http://localhost:5000/api/tasks/me", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        const formattedTodos = data.map((task) => ({
+          id: task.id,
+          title: task.title,
+          description: task.description,
+          completed: task.status === "concluido"
+        }));
+
+        setTodos(formattedTodos);
+      } catch (error) {
+        console.error("Erro ao buscar tarefas:", error);
+        alert("Erro ao conectar ao servidor.");
+      }
     };
 
-    setTodos([...todos, newTask]);
+  useEffect(() => {
+    handleLoadTodos();
+  }, []);
+
+  const handleAddTodo = async () => {
+
+    const token = localStorage.getItem("token"); 
+
+    const response = await fetch("http://localhost:5000/api/tasks/me", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: newTaskTitle,
+        description: newTaskDescription
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Erro ao adicionar tarefa:", data);
+      alert("Erro ao adicionar tarefa.");
+      return;
+    }
+
+    await handleLoadTodos();
+
     setNewTaskTitle('');
+    setNewTaskDescription('');
   };
 
-  // Função que simula o DELETE (Excluir)
-  const handleDeleteTodo = (idToRemove) => {
-    // Retorna todos os itens cujo ID seja DIFERENTE do ID que queremos remover
-    const updatedTodos = todos.filter((todo) => todo.id !== idToRemove);
-    // Atualiza o estado com a nova lista
-    setTodos(updatedTodos);
+  const handleDeleteTodo = async (idToRemove) => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`http://localhost:5000/api/tasks/me/${idToRemove}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      alert(data.message);
+      return;
+    }
+
+    await handleLoadTodos();
+  };
+
+  const handleEditTodo = async (idToEdit, newTitle, newDescription) => {
+    const token = localStorage.getItem("token");
+    
+    const response = await fetch(`http://localhost:5000/api/tasks/me/${idToEdit}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        title: newTitle,
+        description: newDescription
+      })
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      alert(data.message);
+      return;
+    }
+
+    await handleLoadTodos();
+  };
+
+  const handleToggleComplete = async (idToToggle) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`http://localhost:5000/api/tasks/me/${idToToggle}/status`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        status: "concluido"
+      })
+    });
+
+    if (!response.ok) {
+      const data = await response.json();;
+      alert(data.message);
+      return;
+    }
+
+    await handleLoadTodos();
   };
 
   const filteredTodos = todos.filter((todo) =>
@@ -56,18 +157,24 @@ export default function TodoListPage() {
           />
         </div>
 
-        <div className="flex gap-2 mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+        <div className="flex flex-col gap-3 mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
           <input
             type="text"
-            placeholder="O que precisa ser feito?"
+            placeholder="Título da tarefa *"
             value={newTaskTitle}
             onChange={(e) => setNewTaskTitle(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAddTodo()} 
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <textarea
+            placeholder="Descrição..."
+            value={newTaskDescription}
+            onChange={(e) => setNewTaskDescription(e.target.value)}
+            rows="2"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           />
           <button 
             onClick={handleAddTodo}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition self-end"
           >
             Adicionar
           </button>
@@ -79,9 +186,11 @@ export default function TodoListPage() {
               <TodoItem 
                 key={todo.id} 
                 title={todo.title} 
+                description={todo.description} 
                 completed={todo.completed} 
-                // Passamos a função enviando o ID específico desta tarefa
-                onDelete={() => handleDeleteTodo(todo.id)} 
+                onDelete={() => handleDeleteTodo(todo.id)}
+                onEdit={(newTitle, newDescription) => handleEditTodo(todo.id, newTitle, newDescription)}
+                onToggle={() => handleToggleComplete(todo.id)}
               />
             ))
           ) : (

@@ -1,33 +1,86 @@
-import { useState } from "react"; // useState para saber qual modo está, serve para tanto para login quanto para cadastro
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export default function LoginPage(){
-    const[isLogin, setIsLogin] = useState(true); // define que a tela vai carregar inicialmente no login
-    // Inicializa a ferramenta de navegação
-    const navigate = useNavigate();
-    //Função que será chamada ao clicar em entrar ou cadastrar
-    const handleAuth = () => {
-        //Futuramente, aqui será a integração com API
-        navigate('/todo');
+export default function LoginPage() {
+  const [isLogin, setIsLogin] = useState(true);
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [nome, setName] = useState("");
+  
+  const handleAuth = async () => {
+    try {
+      let response;
+      
+      if (isLogin) {
+        response = await fetch("http://localhost:5000/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password 
+          }),
+        });
+        
+        const data = await response.json();
+
+        if (!response.ok) {
+          alert(data.message);
+          return;
+        }
+
+        localStorage.setItem("token", data.access_token);
+        navigate('/todos');
+      } else {
+        response = await fetch("http://localhost:5000/api/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            nome,
+            email,
+            password
+          }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          alert(data.message);
+          return;
+        }
+        
+        alert("Usuário cadastrado com sucesso!");
+        setIsLogin(true);
+        setName("");
+        setEmail("");
+        setPassword("");
+      }
+    } catch (error) {
+      console.error("Erro na autenticação:", error);
+      alert("Erro ao conectar ao servidor.");
     }
+  };
 
-    // return contém o contéudo da pagina em si
-    return (
+  return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-xl shadow-md p-8">
         
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
-          {isLogin ? 'Entrar na sua conta' : 'Criar nova conta'} {/* IF/ELSE para  opções de entrar ou criar conta*/}
+          {isLogin ? 'Entrar na sua conta' : 'Criar nova conta'}
         </h2>
 
         <form className="flex flex-col gap-4">
-          {/* O campo de Nome só aparece se for a tela de Cadastro */}
           {!isLogin && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
               <input
                 type="text"
                 placeholder="Seu nome completo"
+                value={nome}
+                onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -38,6 +91,8 @@ export default function LoginPage(){
             <input
               type="email"
               placeholder="seu@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -47,6 +102,8 @@ export default function LoginPage(){
             <input
               type="password"
               placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -60,7 +117,6 @@ export default function LoginPage(){
           </button>
         </form>
 
-        {/* Botão para alternar entre os modos */}
         <div className="mt-6 text-center text-sm text-gray-600">
           {isLogin ? 'Ainda não tem uma conta?' : 'Já possui uma conta?'}
           <button
@@ -73,5 +129,5 @@ export default function LoginPage(){
 
       </div>
     </div>
-    )
+  );
 }

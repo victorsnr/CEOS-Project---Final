@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import LoginPage from './modules/auth/pages/LoginPage';
+import LoginPage from './modules/auth/pages/LoginPage.jsx';
 import TodoListPage from './modules/todos/pages/TodoListPage';
 
 // gerenciador de rotas da aplicação, mostra qual tela com base no URL

@@ -4,10 +4,12 @@ from routes.users import api_users
 from routes.tasks import api_tasks
 from routes.auth import api_auth
 from extensions import db, jwt
+from flask_cors import CORS
 
 def create_app():
 
     app = Flask(__name__)
+    CORS(app)
 
     app.config.from_object("config.Config")
 

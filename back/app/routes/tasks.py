@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify
 from extensions import db
 from models import User, Task
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from datetime import datetime, date
+#from datetime import datetime, date
 
 api_tasks = Blueprint('tasks', __name__)
 
@@ -15,7 +15,7 @@ def criar_tarefa():
     user_id = int(get_jwt_identity())
     title = data["title"]
     description = data["description"]
-    prazo = datetime.strptime(data["prazo"], "%Y-%m-%d").date()
+    #prazo = datetime.strptime(data["prazo"], "%Y-%m-%d").date()
 
     user = User.query.get(user_id)
 
@@ -34,13 +34,13 @@ def criar_tarefa():
         return jsonify({"message": "A descrição deve ter até 300 caracteres"}), 400
     
     #Tratamento de prazo limite
-    if prazo < date.today():
-        return jsonify({"message": "Erro! Data inválida"}), 400
+    #if prazo < date.today():
+    #    return jsonify({"message": "Erro! Data inválida"}), 400
 
     new_task = Task(id_user = user_id,
                     title = title,
                     description = description,
-                    prazo = prazo,
+                    #prazo = prazo,
                     status = "pendente")
 
     #Tratamento de integridade
@@ -60,7 +60,7 @@ def criar_tarefa_admin(id_user):
 
     title = data["title"]
     description = data["description"]
-    prazo = datetime.strptime(data["prazo"], "%Y-%m-%d").date()
+    #prazo = datetime.strptime(data["prazo"], "%Y-%m-%d").date()
 
     user = User.query.get(id_user)
 
@@ -79,13 +79,13 @@ def criar_tarefa_admin(id_user):
         return jsonify({"message": "A descrição deve ter até 300 caracteres"}), 400
     
     #Tratamento de prazo limite
-    if prazo < date.today():
-        return jsonify({"message": "Erro! Data inválida"}), 400
+    #if prazo < date.today():
+    #    return jsonify({"message": "Erro! Data inválida"}), 400
 
     new_task = Task(id_user = id_user,
                     title = title,
                     description = description,
-                    prazo = prazo,
+                    #prazo = prazo,
                     status = "pendente")
 
     #Tratamento de integridade
@@ -110,7 +110,7 @@ def listar_tasks_usuario():
         return jsonify({"message": "Usuário não encontrado"}), 404
 
     status = request.args.get("status")
-    fora_do_prazo = request.args.get("fora_do_prazo")
+    #fora_do_prazo = request.args.get("fora_do_prazo")
 
     tasks = user.tasks
 
@@ -119,16 +119,17 @@ def listar_tasks_usuario():
         if status and task.status != status:
             continue
 
-        if fora_do_prazo == "true" and not task.fora_do_prazo:
-            continue
+        #if fora_do_prazo == "true" and not task.fora_do_prazo:
+        #    continue
 
         result.append({"id": task.id,
                        "id_user": task.id_user,
                        "title": task.title,
                        "description": task.description,
-                       "prazo": task.prazo.isoformat(),
+                       #"prazo": task.prazo.isoformat(),
                        "status": task.status,
-                       "fora_do_prazo": task.fora_do_prazo})
+                       #"fora_do_prazo": task.fora_do_prazo
+                       })
 
     return jsonify(result), 200
 
@@ -140,7 +141,7 @@ def listar_tasks_usuario_admin(user_id):
         return jsonify({"message": "Usuário não encontrado"}), 404
 
     status = request.args.get("status")
-    fora_do_prazo = request.args.get("fora_do_prazo")
+    #fora_do_prazo = request.args.get("fora_do_prazo")
 
     tasks = user.tasks
 
@@ -149,16 +150,17 @@ def listar_tasks_usuario_admin(user_id):
         if status and task.status != status:
             continue
 
-        if fora_do_prazo == "true" and not task.fora_do_prazo:
-            continue
+        #if fora_do_prazo == "true" and not task.fora_do_prazo:
+        #    continue
 
         result.append({"id": task.id,
                        "id_user": task.id_user,
                        "title": task.title,
                        "description": task.description,
-                       "prazo": task.prazo.isoformat(),
+                       #"prazo": task.prazo.isoformat(),
                        "status": task.status,
-                       "fora_do_prazo": task.fora_do_prazo})
+                       #"fora_do_prazo": task.fora_do_prazo
+                       })
 
     return jsonify(result), 200
 
@@ -170,9 +172,9 @@ def alterar_dados(task_id):
     
     title = data["title"]
     description = data["description"]
-    prazo = datetime.strptime(data["prazo"], "%Y-%m-%d").date()
+    #prazo = datetime.strptime(data["prazo"], "%Y-%m-%d").date()
     
-    if not title or not description or not prazo:
+    if not title or not description: 
         return jsonify({"message": "Erro! Campos obrigatórios em branco"}), 400
     
     #Tratamento de título
@@ -184,8 +186,8 @@ def alterar_dados(task_id):
         return jsonify({"message": "A descrição deve ter até 300 caracteres"}), 400
     
     #Tratamento de prazo limite
-    if prazo < date.today():
-        return jsonify({"message": "Erro! Data inválida"}), 400
+    #if prazo < date.today():
+    #    return jsonify({"message": "Erro! Data inválida"}), 400
 
     result = Task.query.filter_by(id = task_id, id_user = user_id).first()
     
@@ -194,7 +196,7 @@ def alterar_dados(task_id):
 
     result.title = title
     result.description = description
-    result.prazo = prazo
+    #result.prazo = prazo
 
     #Tratamento de integridade
     try:
@@ -211,9 +213,9 @@ def alterar_dados_admin(user_id, task_id):
     
     title = data["title"]
     description = data["description"]
-    prazo = datetime.strptime(data["prazo"], "%Y-%m-%d").date()
+    #prazo = datetime.strptime(data["prazo"], "%Y-%m-%d").date()
     
-    if not title or not description or not prazo:
+    if not title or not description: #or not prazo:
         return jsonify({"message": "Erro! Campos obrigatórios em branco"}), 400
     
     #Tratamento de título
@@ -225,8 +227,8 @@ def alterar_dados_admin(user_id, task_id):
         return jsonify({"message": "A descrição deve ter até 300 caracteres"}), 400
     
     #Tratamento de prazo limite
-    if prazo < date.today():
-        return jsonify({"message": "Erro! Data inválida"}), 400
+    #if prazo < date.today():
+    #    return jsonify({"message": "Erro! Data inválida"}), 400
 
     result = Task.query.filter_by(id = task_id, id_user = user_id).first()
     
@@ -235,7 +237,7 @@ def alterar_dados_admin(user_id, task_id):
 
     result.title = title
     result.description = description
-    result.prazo = prazo
+    #result.prazo = prazo
 
     #Tratamento de integridade
     try:

@@ -21,13 +21,13 @@ class Task(db.Model):
     id_user = db.Column(db.Integer, db.ForeignKey('users.id'), nullable = False)
     title = db.Column(db.String(100), nullable = False)
     description = db.Column(db.String(300), nullable = False)
-    prazo = db.Column(db.Date, nullable = False)
+    #prazo = db.Column(db.Date, nullable = False)
     status = db.Column(Enum("pendente", "concluido", name = "status_task"), nullable = False)
 
     user = db.relationship("User", backref = db.backref('tasks', lazy = True, cascade = "all, delete-orphan"))
 
-    @property
-    def fora_do_prazo(self):
-        return self.status == "pendente" and self.prazo < date.today()
+    #@property
+    #def fora_do_prazo(self):
+    #    return self.status == "pendente" and self.prazo < date.today()
     
     

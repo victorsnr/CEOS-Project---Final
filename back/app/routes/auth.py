@@ -18,7 +18,7 @@ def login():
         return jsonify({"message": "Erro! Usuário não encontrado!"}), 404
     
     if not check_password_hash(user.password, password):
-        return jsonify({"message": "Erro! Senha inválida!"})
+        return jsonify({"message": "Erro! Senha inválida!"}), 401
     
     token = create_access_token(identity = str(user.id))
 
