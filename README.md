@@ -12,37 +12,25 @@
 ---
 
 ## 🚀 Como executar o projeto 
-1. ### 🚀 Inicialização Unificada do Ecossistema 
+1. ### 🛠️ Pré-requisitos
+   
+- No Windows / macOS:
+Instale e abra o **Docker Desktop**
+(https://docs.docker.com/get-started/get-docker/)
+
+- No Linux:
+Instale o **Docker Engine** e o **Docker Compose Plugin**
+```bash
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+```
+   
+2. ### 🚀 Inicialização Unificada do Ecossistema 
 
 Para colocar toda a aplicação em execução com a infraestrutura completa integrada, basta executar o comando abaixo na raiz do projeto:
 
 ```bash
 docker compose up --build
-```
-2. ### 🐍 Configuração do Backend Local (Ambiente Virtual) 
-
-Siga o passo a passo abaixo a partir da raiz do projeto:
-
-1. Navegue até a pasta de contexto do Backend
-```bash
-cd back
-```
-2. Crie o ambiente virtual (comumente chamado de .venv ou venv)
-```bash
-python -m venv .venv
-```
-3. Ative o ambiente virtual conforme o seu sistema operacional:
-- No Linux / macOS:
-```bash
-source .venv/bin/activate
-```
-- No Windows:
-```bash
-.venv\\Scripts\\activate
-```
-4. Baixe e instale todos os pacotes e requerimentos listados
-```bash
-pip install -r requirements.txt
 ```
 
 ---
